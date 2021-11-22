@@ -1,5 +1,12 @@
 from timeit import default_timer
 
+DELTA = 30
+ALPHA = {}
+ALPHA["A"] = {"A": 0, "C": 110, "G": 48, "T": 94}
+ALPHA["C"] = {"A": 110, "C": 0, "G": 118, "T": 48}
+ALPHA["G"] = {"A": 48, "C": 118, "G": 0, "T": 110}
+ALPHA["T"] = {"A": 94, "C": 48, "G": 110, "T": 0}
+
 
 def read_input_file(filename="input.txt"):
     with open(filename) as f:
@@ -35,18 +42,18 @@ def generate_string(base_str, arr):
 
 
 def align_strings(s1, s2):
-    dp = [[0 for _ in range(len(s2))] for _ in range(len(s1))]
+    dp = [[0 for _ in range(len(s2) + 1)] for _ in range(len(s1) + 1)]
 
-    for i in range(len(s1)):
+    for i in range(len(s1) + 1):
         dp[i][0] = i * DELTA
 
-    for i in range(len(s2)):
+    for i in range(len(s2) + 1):
         dp[0][i] = i * DELTA
 
-    for i in range(1, len(s1)):
-        for j in range(1, len(s2)):
+    for i in range(1, len(s1) + 1):
+        for j in range(1, len(s2) + 1):
             dp[i][j] = min(
-                dp[i - 1][j - 1] + ALPHA[s1[i]][s2[j]],
+                dp[i - 1][j - 1] + ALPHA[s1[i - 1]][s2[j - 1]],
                 dp[i - 1][j] + DELTA,
                 dp[i][j - 1] + DELTA,
             )
@@ -74,7 +81,6 @@ def align_strings(s1, s2):
             aligned_string.append(s2[i])
 
     aligned_string.reverse()
-    print("".join(aligned_string))
     return "".join(aligned_string)
 
 
@@ -88,13 +94,6 @@ def write_output_file(s, time_taken, memory_used, filename="output.txt"):
         f.write("\n")
         f.write(f"{memory_used}")
 
-
-DELTA = 30
-ALPHA = {}
-ALPHA["A"] = {"A": 0, "C": 110, "T": 48, "G": 94}
-ALPHA["C"] = {"A": 110, "C": 0, "T": 118, "G": 48}
-ALPHA["T"] = {"A": 48, "C": 118, "T": 0, "G": 110}
-ALPHA["G"] = {"A": 94, "C": 48, "T": 110, "G": 0}
 
 if __name__ == "__main__":
 

@@ -1,3 +1,5 @@
+import os
+import psutil
 from timeit import default_timer
 
 DELTA = 30
@@ -106,7 +108,7 @@ if __name__ == "__main__":
 
     output_string = align_strings(string1, string2)
 
-    memory_used = 0
+    memory_used = psutil.Process(os.getpid()).memory_info().rss // (2 ** 10)
     time_taken = default_timer() - start
 
     write_output_file(output_string, time_taken, memory_used)

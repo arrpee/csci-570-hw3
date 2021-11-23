@@ -60,37 +60,45 @@ def align_strings(s1, s2):
                 dp[i][j - 1] + DELTA,
             )
 
-    aligned_string = []
-    l1 = len(s1) - 1
-    l2 = len(s2) - 2
-    while l1 != 0 and l2 != 0:
-        if dp[l1][l2] == dp[l1 - 1][l2 - 1] + ALPHA[s1[l1]][s2[l2]]:
-            aligned_string.append(s1[l1])
+    s1_aligned = []
+    s2_aligned = []
+    l1 = len(s1)
+    l2 = len(s2)
+    while l1 > 0 and l2 > 0:
+        if dp[l1][l2] == dp[l1 - 1][l2 - 1] + ALPHA[s1[l1 - 1]][s2[l2 - 1]]:
+            s1_aligned.append(s1[l1 - 1])
+            s2_aligned.append(s2[l2 - 1])
             l1 -= 1
             l2 -= 1
-        elif dp[l1][l2] == dp[i - 1][j] + DELTA:
-            aligned_string.append("_")
+        elif dp[l1][l2] == dp[l1 - 1][l2] + DELTA:
+            s1_aligned.append(s1[l1 - 1])
+            s2_aligned.append("_")
             l1 -= 1
         else:
-            aligned_string.append("_")
+            s1_aligned.append("_")
+            s2_aligned.append(s2[l2 - 1])
             l2 -= 1
 
     if l1:
-        for i in range(l1, -1, -1):
-            aligned_string.append(s1[i])
+        for i in range(l1, 0, -1):
+            s1_aligned.append(s1[i - 1])
+            s2_aligned.append("_")
     elif l2:
-        for i in range(l2, -1, -1):
-            aligned_string.append(s2[i])
+        for i in range(l2, 0, -1):
+            s1_aligned.append("_")
+            s2_aligned.append(s2[i - 1])
 
-    aligned_string.reverse()
-    return "".join(aligned_string)
+    s1_aligned.reverse()
+    s2_aligned.reverse()
+
+    return "".join(s1_aligned), "".join(s2_aligned)
 
 
-def write_output_file(s, time_taken, memory_used, filename="output.txt"):
+def write_output_file(s1, s2, time_taken, memory_used, filename="output.txt"):
     with open(filename, "w") as f:
-        f.write(s[:50])
+        f.write(f"{s1[:50]} {s2[:50]}")
         f.write("\n")
-        f.write(s[-50:])
+        f.write(f"{s1[-50:]} {s2[-50:]}")
         f.write("\n")
         f.write(f"{time_taken:.3f}")
         f.write("\n")
@@ -106,9 +114,9 @@ if __name__ == "__main__":
     string1 = generate_string(base_str1, indices1)
     string2 = generate_string(base_str2, indices2)
 
-    output_string = align_strings(string1, string2)
+    output_string1, output_string2 = align_strings(string1, string2)
 
     memory_used = psutil.Process(os.getpid()).memory_info().rss // (2 ** 10)
     time_taken = default_timer() - start
 
-    write_output_file(output_string, time_taken, memory_used)
+    write_output_file(output_string1, output_string2, time_taken, memory_used)

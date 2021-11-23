@@ -1,6 +1,6 @@
 import os
 import psutil
-from timeit import default_timer
+from time import process_time
 
 DELTA = 30
 ALPHA = {}
@@ -100,23 +100,21 @@ def write_output_file(s1, s2, time_taken, memory_used, filename="output.txt"):
         f.write("\n")
         f.write(f"{s1[-50:]} {s2[-50:]}")
         f.write("\n")
-        f.write(f"{time_taken:.3f}")
+        f.write(f"{time_taken:.4f}")
         f.write("\n")
         f.write(f"{memory_used}")
 
 
 if __name__ == "__main__":
 
-    start = default_timer()
-
     base_str1, indices1, base_str2, indices2 = read_input_file()
 
     string1 = generate_string(base_str1, indices1)
     string2 = generate_string(base_str2, indices2)
 
+    start = process_time()
     output_string1, output_string2 = align_strings(string1, string2)
-
     memory_used = psutil.Process(os.getpid()).memory_info().rss // (2 ** 10)
-    time_taken = default_timer() - start
+    time_taken = process_time() - start
 
     write_output_file(output_string1, output_string2, time_taken, memory_used)

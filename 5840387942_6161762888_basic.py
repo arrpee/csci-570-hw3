@@ -1,5 +1,6 @@
 import os
 import psutil
+import argparse
 from time import process_time
 
 DELTA = 30
@@ -91,30 +92,37 @@ def align_strings(s1, s2):
     s1_aligned.reverse()
     s2_aligned.reverse()
 
-    return "".join(s1_aligned), "".join(s2_aligned)
+    return dp[-1][-1], "".join(s1_aligned), "".join(s2_aligned)
 
 
-def write_output_file(s1, s2, time_taken, memory_used, filename="output.txt"):
+def write_output_file(
+    s1, s2, solution_cost, time_taken, memory_used, filename="output.txt"
+):
     with open(filename, "w") as f:
-        f.write(f"{s1[:50]} {s2[:50]}")
+        f.write(f"{s1[:50]} {s1[-50:]}")
         f.write("\n")
-        f.write(f"{s1[-50:]} {s2[-50:]}")
+        f.write(f"{s2[:50]} {s2[-50:]}")
         f.write("\n")
         f.write(f"{time_taken:.4f}")
         f.write("\n")
-        f.write(f"{memory_used}")
+        f.write(f"{memory_used:.1f}")
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filename", type=str)
+    args = parser.parse_args()
 
-    base_str1, indices1, base_str2, indices2 = read_input_file()
+    base_str1, indices1, base_str2, indices2 = read_input_file(args.filename)
 
     string1 = generate_string(base_str1, indices1)
     string2 = generate_string(base_str2, indices2)
 
     start = process_time()
-    output_string1, output_string2 = align_strings(string1, string2)
-    memory_used = psutil.Process(os.getpid()).memory_info().rss // (2 ** 10)
+    solution_cost, output_string1, output_string2 = align_strings(string1, string2)
+    memory_used = psutil.Process(os.getpid()).memory_info().rss // 1024
     time_taken = process_time() - start
 
-    write_output_file(output_string1, output_string2, time_taken, memory_used)
+    write_output_file(
+        output_string1, output_string2, solution_cost, time_taken, memory_used
+    )

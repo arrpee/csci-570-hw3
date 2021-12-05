@@ -160,11 +160,15 @@ def dc_align_strings(s1, s2):
     dc_align_strings(s1[q:], s2[split:])
 
 
-def write_output_file(s1, s2, time_taken, memory_used, filename="output.txt"):
+def write_output_file(
+    s1, s2, solution_cost, time_taken, memory_used, filename="output.txt"
+):
     with open(filename, "w") as f:
         f.write(f"{s1[:50]} {s1[-50:]}")
         f.write("\n")
         f.write(f"{s2[:50]} {s2[-50:]}")
+        f.write("\n")
+        f.write(f"{solution_cost:.1f}")
         f.write("\n")
         f.write(f"{time_taken:.4f}")
         f.write("\n")
@@ -198,4 +202,6 @@ if __name__ == "__main__":
     memory_used = psutil.Process(os.getpid()).memory_info().rss // 1024
     time_taken = process_time() - start
 
-    write_output_file(output_string1, output_string2, time_taken, memory_used)
+    write_output_file(
+        output_string1, output_string2, solution_cost, time_taken, memory_used
+    )

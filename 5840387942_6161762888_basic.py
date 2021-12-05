@@ -103,6 +103,8 @@ def write_output_file(
         f.write("\n")
         f.write(f"{s2[:50]} {s2[-50:]}")
         f.write("\n")
+        f.write(f"{solution_cost:.1f}")
+        f.write("\n")
         f.write(f"{time_taken:.4f}")
         f.write("\n")
         f.write(f"{memory_used:.1f}")

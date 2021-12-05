@@ -92,52 +92,77 @@ def align_strings(s1, s2):
     s1_aligned.reverse()
     s2_aligned.reverse()
 
-    return dp[-1][-1], "".join(s1_aligned), "".join(s2_aligned)
+    return "".join(s1_aligned), "".join(s2_aligned)
 
 
-def space_efficient_alignment(s1, s2):
+def forward_space_efficient_alignment(s1, s2):
     dp = [[0, 0] for _ in range(len(s1) + 1)]
 
     for i in range(len(s1) + 1):
         dp[i][0] = i * DELTA
 
-    for i in range(1, len(s1) + 1):
-        dp[0][1] = i * DELTA
-        for j in range(1, len(s2) + 1):
-            dp[j][1] = min(
-                dp[j - 1][0] + ALPHA[s1[i - 1]][s2[j - 1]],
-                dp[j - 1][1] + DELTA,
-                dp[j][0] + DELTA,
+    for j in range(1, len(s2) + 1):
+        dp[0][1] = j * DELTA
+        for i in range(1, len(s1) + 1):
+            dp[i][1] = min(
+                dp[i - 1][0] + ALPHA[s1[i - 1]][s2[j - 1]],
+                dp[i - 1][1] + DELTA,
+                dp[i][0] + DELTA,
             )
 
-        for j in range(len(s1) + 1):
-            dp[j][0] = dp[j][1]
-    return dp[: len(string2) + 1]
+        for k in range(len(s1) + 1):
+            dp[k][0] = dp[k][1]
+    return dp
 
 
 def backward_space_efficient_alignment(s1, s2):
     dp = [[0, 0] for _ in range(len(s1) + 1)]
 
     for i in range(len(s1) + 1):
-        dp[i][1] = i * DELTA
+        dp[i][0] = i * DELTA
 
-    for i in range(1, len(s1) + 1):
-        dp[0][0] = i * DELTA
-        for j in range(1, len(s2) + 1):
-            dp[j][0] = min(
-                dp[j - 1][1] + ALPHA[s1[len(s1) - i]][s2[len(s2) - j]],
-                dp[j - 1][0] + DELTA,
-                dp[j][1] + DELTA,
+    for j in range(1, len(s2) + 1):
+        dp[0][1] = j * DELTA
+        for i in range(1, len(s1) + 1):
+            dp[i][1] = min(
+                dp[i - 1][0] + ALPHA[s1[len(s1) - i]][s2[len(s2) - j]],
+                dp[i - 1][1] + DELTA,
+                dp[i][0] + DELTA,
             )
 
-        for j in range(len(s1) + 1):
-            dp[j][1] = dp[j][0]
-    return dp[: len(string2) + 1]
+        for k in range(len(s1) + 1):
+            dp[k][0] = dp[k][1]
+    return dp
 
 
-def write_output_file(
-    s1, s2, solution_cost, time_taken, memory_used, filename="output.txt"
-):
+L = []
+
+
+def dc_align_strings(s1, s2):
+    m = len(s1)
+    n = len(s2)
+    if m <= 2 or n <= 2:
+        L.append(align_strings(s1, s2))
+        return
+
+    split = n // 2
+
+    f = forward_space_efficient_alignment(s1, s2[:split])
+    g = backward_space_efficient_alignment(s1, s2[split:])
+
+    minq = f[0][1] + g[len(g) - 1][1]
+    q = 0
+    for i in range(len(g)):
+        sm = f[i][1] + g[len(g) - 1 - i][1]
+        if sm < minq:
+            minq = sm
+            q = i
+
+    dc_align_strings(s1[:q], s2[:split])
+    dc_align_strings(s1[q:], s2[split:])
+
+
+def write_output_file(s1, s2, time_taken, memory_used, filename="output.txt"):
     with open(filename, "w") as f:
         f.write(f"{s1[:50]} {s1[-50:]}")
         f.write("\n")
@@ -159,10 +184,13 @@ if __name__ == "__main__":
     string2 = generate_string(base_str2, indices2)
 
     start = process_time()
-    solution_cost, output_string1, output_string2 = align_strings(string1, string2)
+    print(*align_strings(string1, string2))
+    dc_align_strings(string1, string2)
+    output_string1 = "".join([x[0] for x in L])
+    output_string2 = "".join([x[1] for x in L])
+    print(output_string1, output_string2)
+
     memory_used = psutil.Process(os.getpid()).memory_info().rss // 1024
     time_taken = process_time() - start
 
-    write_output_file(
-        output_string1, output_string2, solution_cost, time_taken, memory_used
-    )
+    write_output_file(output_string1, output_string2, time_taken, memory_used)

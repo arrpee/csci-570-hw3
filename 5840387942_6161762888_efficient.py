@@ -1,6 +1,7 @@
 import os
 import psutil
 import argparse
+from copy import deepcopy
 from time import process_time
 
 DELTA = 30
@@ -9,6 +10,7 @@ ALPHA["A"] = {"A": 0, "C": 110, "G": 48, "T": 94}
 ALPHA["C"] = {"A": 110, "C": 0, "G": 118, "T": 48}
 ALPHA["G"] = {"A": 48, "C": 118, "G": 0, "T": 110}
 ALPHA["T"] = {"A": 94, "C": 48, "G": 110, "T": 0}
+dp = []
 
 
 def read_input_file(filename="input.txt"):
@@ -96,7 +98,6 @@ def align_strings(s1, s2):
 
 
 def forward_space_efficient_alignment(s1, s2):
-    dp = [[0, 0] for _ in range(len(s1) + 1)]
 
     for i in range(len(s1) + 1):
         dp[i][0] = i * DELTA
@@ -112,48 +113,45 @@ def forward_space_efficient_alignment(s1, s2):
 
         for k in range(len(s1) + 1):
             dp[k][0] = dp[k][1]
-    return dp
+    return deepcopy(dp[: len(s1) + 1])
 
 
 def backward_space_efficient_alignment(s1, s2):
-    dp = [[0, 0] for _ in range(len(s1) + 1)]
 
     for i in range(len(s1) + 1):
-        dp[i][0] = i * DELTA
+        dp[i][0] = (len(s1) - i) * DELTA
 
-    for j in range(1, len(s2) + 1):
-        dp[0][1] = j * DELTA
-        for i in range(1, len(s1) + 1):
+    for j in range(len(s2) - 1, -1, -1):
+        dp[len(s1)][1] = (len(s2) - j) * DELTA
+        for i in range(len(s1) - 1, -1, -1):
             dp[i][1] = min(
-                dp[i - 1][0] + ALPHA[s1[len(s1) - i]][s2[len(s2) - j]],
-                dp[i - 1][1] + DELTA,
+                dp[i + 1][0] + ALPHA[s1[i]][s2[j]],
+                dp[i + 1][1] + DELTA,
                 dp[i][0] + DELTA,
             )
 
         for k in range(len(s1) + 1):
             dp[k][0] = dp[k][1]
-    return dp
+    return deepcopy(dp[: len(s1) + 1])
 
 
 L = []
 
 
 def dc_align_strings(s1, s2):
-    m = len(s1)
-    n = len(s2)
-    if m <= 2 or n <= 2:
+    if len(s1) <= 2 or len(s2) <= 2:
         L.append(align_strings(s1, s2))
         return
 
-    split = n // 2
+    split = len(s2) // 2
 
     f = forward_space_efficient_alignment(s1, s2[:split])
     g = backward_space_efficient_alignment(s1, s2[split:])
 
-    minq = f[0][1] + g[len(g) - 1][1]
+    minq = f[0][1] + g[0][1]
     q = 0
-    for i in range(len(g)):
-        sm = f[i][1] + g[len(g) - 1 - i][1]
+    for i in range(len(s1) + 1):
+        sm = f[i][1] + g[i][1]
         if sm < minq:
             minq = sm
             q = i
@@ -174,21 +172,40 @@ def write_output_file(s1, s2, time_taken, memory_used, filename="output.txt"):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("filename", type=str)
-    args = parser.parse_args()
 
-    base_str1, indices1, base_str2, indices2 = read_input_file(args.filename)
+    base_str1, indices1, base_str2, indices2 = read_input_file("input2.txt")
 
     string1 = generate_string(base_str1, indices1)
     string2 = generate_string(base_str2, indices2)
 
     start = process_time()
-    print(*align_strings(string1, string2))
+    output_string1, output_string2 = align_strings(string1, string2)
+    solution_cost = 0
+    for i in range(len(output_string1)):
+        if output_string1[i] != "_" and output_string2[i] != "_":
+            solution_cost += ALPHA[output_string1[i]][output_string2[i]]
+        else:
+            solution_cost += DELTA
+
+    print(solution_cost)
+    print(output_string1)
+    print(output_string2)
+
+    dp = [[0, 0] for _ in range(len(string1) + 1)]
     dc_align_strings(string1, string2)
     output_string1 = "".join([x[0] for x in L])
     output_string2 = "".join([x[1] for x in L])
-    print(output_string1, output_string2)
+
+    solution_cost = 0
+    for i in range(len(output_string1)):
+        if output_string1[i] != "_" and output_string2[i] != "_":
+            solution_cost += ALPHA[output_string1[i]][output_string2[i]]
+        else:
+            solution_cost += DELTA
+
+    print(solution_cost)
+    print(output_string1)
+    print(output_string2)
 
     memory_used = psutil.Process(os.getpid()).memory_info().rss // 1024
     time_taken = process_time() - start

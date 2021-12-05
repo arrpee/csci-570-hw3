@@ -172,24 +172,16 @@ def write_output_file(s1, s2, time_taken, memory_used, filename="output.txt"):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filename", type=str)
+    args = parser.parse_args()
 
-    base_str1, indices1, base_str2, indices2 = read_input_file("input2.txt")
+    base_str1, indices1, base_str2, indices2 = read_input_file(args.filename)
 
     string1 = generate_string(base_str1, indices1)
     string2 = generate_string(base_str2, indices2)
 
     start = process_time()
-    output_string1, output_string2 = align_strings(string1, string2)
-    solution_cost = 0
-    for i in range(len(output_string1)):
-        if output_string1[i] != "_" and output_string2[i] != "_":
-            solution_cost += ALPHA[output_string1[i]][output_string2[i]]
-        else:
-            solution_cost += DELTA
-
-    print(solution_cost)
-    print(output_string1)
-    print(output_string2)
 
     dp = [[0, 0] for _ in range(len(string1) + 1)]
     dc_align_strings(string1, string2)
@@ -202,10 +194,6 @@ if __name__ == "__main__":
             solution_cost += ALPHA[output_string1[i]][output_string2[i]]
         else:
             solution_cost += DELTA
-
-    print(solution_cost)
-    print(output_string1)
-    print(output_string2)
 
     memory_used = psutil.Process(os.getpid()).memory_info().rss // 1024
     time_taken = process_time() - start

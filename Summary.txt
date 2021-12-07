@@ -1,0 +1,29 @@
+Raaj Patil, Raajitha Rajkumar
+
+
+Insights/Observations:
+
+In this program, we used dynamic programming for our basic algorithm. We have a matrix that gets updated with the values while traversing through. In the memory
+plot for this, we can see that the program takes up a lot of space. In our efficient algorithm, we focus on using O(m+n) memory and computing the alignment in
+linear space. We do this by reusing memory within the columns of the matrix. We can discard old columns because we only need the memory of the column before to
+compute the alignment, only scoring two columns at a time. We do this by using recursion, and that splits the area into parts, creating subproblems that can be
+solved in the time proportional to its area. This divide-and-conquer method combined with dynamic programming is how we created our efficient algorithm. You can see
+in the memory plot that the efficient algorithm takes up much less space than the basic algorithm. This recursion is implemented with a forward and backward space
+efficient functions in our code to maneuver through the grid properly and align it recursively with our dynamic programming function. This means that the efficient
+algorithm takes up much less space with the same problem size by discarding, and reusing memory using divide-and-conquer. 
+
+From our results, we can see that as the problem, O(|m|+|n|) got bigger, the memory used (kb) stayed under 20000 for the efficient algorithm. While the size was
+about 2e6 for the problem, the memory was around 15000 for the efficient problem, while the memory was 90000 for the basic algorithm. We can attest this to the
+basic algorithm not reusing any memory while traversing through the matrix. However, when looking at the CPU time taken for the problem size, the basic algorithm
+actually takes less CPU time. Nonetheless, the difference is not as big as the difference from the memory, which is why the efficient algorithm is more efficient.
+We can see that there is still un upwards trend for both CPU times for both algorithms. When we compare the problem size 2e6 again, the time taken for the basic
+solution is about 0.75 s, while the time for the efficient solution is 1.75 s. The time has about twice the difference, while the space between the 2 solutions had
+almost 6 times the difference for that specific problem size. We can see that the tradeoff here deems the efficient solution better. For bigger problem spaces,
+using less O(m+n) memory over O(mn) memory is very useful.
+
+
+Contributions:
+
+The basic algorithm for this project was fully implemented by Raaj P. For the efficient algorithm, Raaj P and Raajitha R worked on the forward space efficient,
+backward space efficient, and recursive functions together. The efficient solution strategies were researched by both of us. Raaj P handled the plots/outputs while
+Raajitha R handled the summary. 

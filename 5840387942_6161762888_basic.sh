@@ -1,0 +1,1 @@
+python3 5840387942_6161762888_basic.py input.txt

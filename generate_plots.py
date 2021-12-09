@@ -2,6 +2,7 @@
 from tqdm import tqdm
 import subprocess
 import random
+import matplotlib
 import matplotlib.pyplot as plt
 
 
@@ -42,11 +43,12 @@ if __name__ == "__main__":
 
     problem_size = []
 
-    for i in tqdm(range(1, 9)):
-        for j in [0, 2]:
-            # print((2 ** i) * (base_length + j))
-            generate_test_case(filename, base_length + j, base_length + j, i, i)
-            problem_size.append(((2 ** i) * (base_length + j)) ** 2)
+    for i in tqdm(range(2, 11)):
+        for j in [1, 0]:
+            generate_test_case(filename, base_length, base_length, i, i - j)
+            problem_size.append(
+                ((2 ** i) * (base_length)) + (2 ** (i - j)) * (base_length)
+            )
 
             output = subprocess.run(
                 [
@@ -80,22 +82,66 @@ if __name__ == "__main__":
             time_efficient.append(float(time[: time.find(" ")]))
             memory_efficient.append(int(memory[: memory.find(" ")]) / 1024)
 
-    plt.ylabel("Time Taken (s)")
-    plt.xlabel("Problem Size (|m| * |n|)")
-    plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-    plt.plot(problem_size, time_basic, "o", label="Basic", linestyle="-")
-    plt.plot(problem_size, time_efficient, "^", label="Efficient", linestyle="--")
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.set_ylabel("Time Taken (s)")
+    ax.set_xlabel("Problem Size (|m| + |n|) [plotted on a log scale]")
+    ax.set_xscale("log")
+    ax.set_xticks(problem_size)
+    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.plot(problem_size, time_basic, "o", label="Basic", linestyle="-")
+    ax.plot(problem_size, time_efficient, "^", label="Efficient", linestyle="--")
+    for (psize, data) in zip(problem_size, time_basic):
+
+        plt.annotate(
+            f"{data}s",  # this is the text
+            (psize, data),  # these are the coordinates to position the label
+            textcoords="offset points",  # how to position the text
+            xytext=(0, -12),  # distance from text to points (x,y)
+            ha="center",
+        )
+
+    for (psize, data) in zip(problem_size, time_efficient):
+
+        plt.annotate(
+            f"{data}s",  # this is the text
+            (psize, data),  # these are the coordinates to position the label
+            textcoords="offset points",  # how to position the text
+            xytext=(0, 12),  # distance from text to points (x,y)
+            ha="center",
+        )
     plt.legend()
     plt.savefig(
         "CPUPlot.jpg", format="jpg", dpi=200, bbox_inches="tight", pad_inches=0.3
     )
 
-    plt.cla()
-    plt.ylabel("Memory Used (kb)")
-    plt.xlabel("Problem Size (|m| * |n|)")
-    plt.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
-    plt.plot(problem_size, memory_basic, "o", label="Basic", linestyle="-")
-    plt.plot(problem_size, memory_efficient, "^", label="Efficient", linestyle="--")
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.set_ylabel("Memory Used (kb)")
+    ax.set_xlabel("Problem Size (|m| + |n|) [plotted on a log scale]")
+    ax.set_xscale("log")
+    ax.set_xticks(problem_size)
+    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.plot(problem_size, memory_basic, "o", label="Basic", linestyle="-")
+    ax.plot(problem_size, memory_efficient, "^", label="Efficient", linestyle="--")
+    for (psize, data) in zip(problem_size, memory_basic):
+        label = f"{data/1024:.0f}Mb"
+
+        plt.annotate(
+            label,  # this is the text
+            (psize, data),  # these are the coordinates to position the label
+            textcoords="offset points",  # how to position the text
+            xytext=(0, 12),  # distance from text to points (x,y)
+            ha="center",
+        )
+    for (psize, data) in zip(problem_size, memory_efficient):
+        label = f"{data/1024:.0f}Mb"
+
+        plt.annotate(
+            label,  # this is the text
+            (psize, data),  # these are the coordinates to position the label
+            textcoords="offset points",  # how to position the text
+            xytext=(0, -12),  # distance from text to points (x,y)
+            ha="center",
+        )
     plt.legend()
     plt.savefig(
         "MemoryPlot.jpg", format="jpg", dpi=200, bbox_inches="tight", pad_inches=0.3
